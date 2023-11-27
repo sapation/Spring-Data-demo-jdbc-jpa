@@ -1,4 +1,4 @@
-package com.example.Database.domain;
+package com.example.Database.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Book {
-    private String isbn;
-    private String title;
-    private Long authorId;
+public class AuthorDto {
+    private Long id;
+
+    private String name;
+
+    private Integer age;
 }
