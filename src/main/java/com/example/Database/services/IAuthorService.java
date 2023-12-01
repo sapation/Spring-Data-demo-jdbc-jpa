@@ -12,4 +12,12 @@ public interface IAuthorService {
     List<AuthorEntity> getAllAuthor();
 
     Optional<AuthorEntity> findAuthor(Long id);
+
+    boolean isExist(Long id);
+
+    AuthorEntity save(AuthorEntity authorEntity);
+
+    AuthorEntity partialUpdate(Long id, AuthorEntity authorEntity);
+
+    void delete(Long id);
 }

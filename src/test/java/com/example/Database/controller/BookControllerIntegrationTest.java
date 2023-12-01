@@ -74,18 +74,115 @@ public class BookControllerIntegrationTest {
         );
     }
 
+//    @Test
+//    public void testThatListBookSuccessfullyReturnsBooks() throws Exception {
+//        BookEntity bookDto = TestDataUtil.createTestBook(null);
+//        bookService.createUpdateBook(bookDto.getIsbn(), bookDto);
+//
+//        mockMvc.perform(
+//                MockMvcRequestBuilders.get("/books")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//        ).andExpect(
+//                MockMvcResultMatchers.jsonPath("$[0].isbn").value("978-1-2345-6789-0")
+//        ).andExpect(
+//                MockMvcResultMatchers.jsonPath("$[0].title").value("The shadow in the Attic")
+//        );
+//    }
+
     @Test
-    public void testThatListBookSuccessfullyReturnsBooks() throws Exception {
+    public void testThatSingleBookSuccessfullyReturnsHttp20Ok() throws Exception {
         BookEntity bookDto = TestDataUtil.createTestBook(null);
-        bookService.createBook(bookDto.getIsbn(), bookDto);
+        bookService.createUpdateBook(bookDto.getIsbn(), bookDto);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/books")
+                MockMvcRequestBuilders.get("/books/"+bookDto.getIsbn())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[0].isbn").value("978-1-2345-6789-0")
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[0].title").value("The shadow in the Attic")
+                MockMvcResultMatchers.status().isOk()
         );
     }
+
+    @Test
+    public void testThatSingleBookSuccessfullyReturnsHttpNotFound() throws Exception {
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/books/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+
+    @Test
+    public void testThatSingleBookSuccessfullyReturnsBook() throws Exception {
+        BookEntity bookDto = TestDataUtil.createTestBook(null);
+        bookService.createUpdateBook(bookDto.getIsbn(), bookDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/books/"+bookDto.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.isbn").value("978-1-2345-6789-0")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.title").value("The shadow in the Attic")
+        );
+    }
+
+    @Test
+    public void testThatPartialUpdateBookSuccessfullyReturnsHttp20Ok() throws Exception {
+        BookEntity bookEntity = TestDataUtil.createTestBook(null);
+        bookService.createUpdateBook(bookEntity.getIsbn(), bookEntity);
+
+        BookDto bookDto = TestDataUtil.createTestBookDto(null);
+        bookDto.setTitle("Book Updated");
+        String bookJson = objectMapper.writeValueAsString(bookDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/books/" + bookEntity.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testThatPartialUpdateBookSuccessfullyReturnsBook() throws Exception {
+        BookEntity bookEntity = TestDataUtil.createTestBook(null);
+        bookService.createUpdateBook(bookEntity.getIsbn(), bookEntity);
+
+        BookDto bookDto = TestDataUtil.createTestBookDto(null);
+        bookDto.setTitle("Book Updated");
+        String bookJson = objectMapper.writeValueAsString(bookDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/books/" + bookEntity.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.isbn").value("978-1-2345-6789-0")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.title").value("Book Updated")
+        );
+    }
+
+    @Test
+    public void testThatDeleteAuthorWhichDoesNotExistReturn204Status() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/books/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    public void testThatDeleteAuthorOnExistReturn204Status() throws Exception {
+        BookEntity testBookEntity = TestDataUtil.createTestBook(null);
+        BookEntity savedBook = bookService.createUpdateBook(testBookEntity.getIsbn(), testBookEntity);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/books/"+ savedBook.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
 }

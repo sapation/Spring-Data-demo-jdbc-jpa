@@ -45,4 +45,42 @@ public class AuthorController {
             return new ResponseEntity<>(authorDto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @PutMapping("/authors/{id}")
+    public ResponseEntity<AuthorDto> fullUpdateAuthor(
+            @PathVariable("id") Long id,
+            @RequestBody AuthorDto authorDto) {
+        if (!authorService.isExist(id)) {
+            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        authorDto.setId(id);
+        AuthorEntity authorEntity = authorMapper.mapFrom(authorDto);
+        AuthorEntity savedAuthorEntity = authorService.save(authorEntity);
+        return new ResponseEntity<>(
+                authorMapper.mapTo(savedAuthorEntity),
+                HttpStatus.OK);
+    }
+
+    @PatchMapping("/authors/{id}")
+    public ResponseEntity<AuthorDto> partialUpdateAuthor(
+            @PathVariable("id") Long id,
+            @RequestBody AuthorDto authorDto) {
+        if (!authorService.isExist(id)) {
+            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        authorDto.setId(id);
+        AuthorEntity authorEntity = authorMapper.mapFrom(authorDto);
+        AuthorEntity updatedAuthor = authorService.partialUpdate(id, authorEntity);
+        return new ResponseEntity<>(
+                authorMapper.mapTo(updatedAuthor),
+                HttpStatus.OK);
+    }
+
+    @DeleteMapping("/authors/{id}")
+    public ResponseEntity deleteAuthor(@PathVariable("id") Long id) {
+        authorService.delete(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }
